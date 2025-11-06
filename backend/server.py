@@ -6,16 +6,16 @@ import logging
 from pathlib import Path
 from typing import List
 
-from models import (
+from backend.models import (
     Grain, GrainResponse, 
     Order, OrderCreate, OrderResponse,
     Contact, ContactCreate, ContactResponse
 )
-from database import grains_collection, orders_collection, contacts_collection, users_collection, auctions_collection, bids_collection
-from seed_data import INITIAL_GRAINS
-from auth_routes import router as auth_router
-from auction_routes import router as auction_router
-from auth import get_password_hash
+from backend.database import grains_collection, orders_collection, contacts_collection, users_collection, auctions_collection, bids_collection
+from backend.seed_data import INITIAL_GRAINS
+from backend.auth_routes import router as auth_router
+from backend.auction_routes import router as auction_router
+from backend.auth import get_password_hash
 
 
 ROOT_DIR = Path(__file__).parent
