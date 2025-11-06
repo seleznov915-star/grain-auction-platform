@@ -10,7 +10,7 @@ mongo_url = os.environ['MONGO_URL']
 db_name = os.environ['DB_NAME']
 
 client = AsyncIOMotorClient(mongo_url)
-db = client[db_name]
+db = client[grain_app]
 
 # Collections
 grains_collection = db.grains
