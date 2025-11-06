@@ -1,0 +1,22 @@
+* {
+    scroll-behavior: smooth;
+}
+
+.App {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Smooth transitions for interactive elements */
+button {
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+a {
+    transition: color 0.3s ease;
+}
+
+img {
+    transition: transform 0.5s ease;
+}
