@@ -1,5 +1,4 @@
 from fastapi import APIRouter, HTTPException, Depends
-from database import users_collection
 from email_service import send_accreditation_approved_email, send_accreditation_rejected_email
 from backend.auth_models import UserRegister, UserLogin, User, UserResponse, Token, AccreditationUpdate
 import logging
