@@ -2,7 +2,7 @@ from pydantic import BaseModel, EmailStr, Field
 from typing import Optional
 from datetime import datetime
 import uuid
-st
+
 # User Models
 class UserRegister(BaseModel):
     email: EmailStr
