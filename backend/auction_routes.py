@@ -1,5 +1,13 @@
 from fastapi import APIRouter, HTTPException, Depends
-from auction_models import AuctionCreate, Auction, AuctionResponse, BidCreate, Bid, BidResponse, WinnerSelect
+from backend.auction_models import (
+    AuctionCreate,
+    Auction,
+    AuctionResponse,
+    BidCreate,
+    Bid,
+    BidResponse,
+    WinnerSelect
+)
 from auth import get_current_admin, get_approved_buyer, get_current_user
 from database import auctions_collection, bids_collection, users_collection
 from email_service import send_auction_winner_email
