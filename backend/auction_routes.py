@@ -10,8 +10,8 @@ from backend.auction_models import (
 )
 from backend.auth import get_current_admin, get_approved_buyer, get_current_user
 from backend.database import auctions_collection, bids_collection, users_collection
-from email_service import send_auction_winner_email
-from datetime import datetime
+from backend.email_service import send_auction_winner_email
+from backend.datetime import datetime
 import logging
 
 logger = logging.getLogger(__name__)
