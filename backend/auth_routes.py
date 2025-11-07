@@ -9,7 +9,10 @@ from backend.auth import (
 )
 
 from backend.database import users_collection
-from backend.email_service import send_accreditation_approved_email, send_accreditation_rejected_email
+from backend.email_service import (
+    send_accreditation_approved_email,
+    send_accreditation_rejected_email
+)
 
 from backend.auth_models import (
     UserRegister,
