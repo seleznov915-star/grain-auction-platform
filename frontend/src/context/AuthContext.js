@@ -3,7 +3,7 @@ import axios from 'axios';
 
 const AuthContext = createContext();
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL; // http://192.168.0.116:8000/api
+onst API = process.env.REACT_APP_BACKEND_URL;
 const API = BACKEND_URL; // залишаємо як є
 
 export const AuthProvider = ({ children }) => {
