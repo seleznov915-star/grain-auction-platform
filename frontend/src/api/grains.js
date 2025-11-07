@@ -1,6 +1,7 @@
 import axios from "axios";
 
-const API = process.env.REACT_APP_BACKEND_URL;  // http://192.168.0.116:8000
+const API_URL = "https://grain-auction-platform.onrender.com/api";
+
 
 export const fetchGrains = async () => {
   try {
