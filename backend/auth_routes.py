@@ -3,6 +3,7 @@ from auth_models import UserRegister, UserLogin, User, UserResponse, Token, Accr
 from auth import get_password_hash, verify_password, create_access_token, get_current_user, get_current_admin
 from database import users_collection
 from email_service import send_accreditation_approved_email, send_accreditation_rejected_email
+from backend.auth_models import UserRegister, UserLogin, User, UserResponse, Token, AccreditationUpdate
 import logging
 
 logger = logging.getLogger(__name__)
