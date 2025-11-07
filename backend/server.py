@@ -49,7 +49,7 @@ async def seed_database():
     admin_exists = await users_collection.find_one({"email": "admin@graincompany.ua"})
     if not admin_exists:
         logger.info("Creating default admin user...")
-        from auth_models import User
+        from backend.auth_models import User 
         admin = User(
             email="admin@graincompany.ua",
             hashed_password=get_password_hash("admin123"),
