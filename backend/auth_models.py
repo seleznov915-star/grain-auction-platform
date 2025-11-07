@@ -1,7 +1,6 @@
 from pydantic import BaseModel, EmailStr, Field
 from typing import Optional
 from datetime import datetime
-from .auth_models import UserRegister, UserLogin, User, UserResponse, Token, AccreditationUpdate
 import uuid
 
 # User Models
