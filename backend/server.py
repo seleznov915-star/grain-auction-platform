@@ -24,6 +24,14 @@ load_dotenv(ROOT_DIR / '.env')
 # Create the main app without a prefix
 app = FastAPI()
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_credentials=True,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
 
@@ -119,10 +127,3 @@ app.include_router(api_router)
 app.include_router(auth_router, prefix="/api")
 app.include_router(auction_router, prefix="/api")
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_credentials=True,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
