@@ -1,8 +1,8 @@
-import axios from "axios";
+
 
 const API = process.env.REACT_APP_BACKEND_URL;
 
-
+import axios from "axios";
 export const fetchGrains = async () => {
   try {
     const response = await axios.get(`${API}/grains`); // правильно
