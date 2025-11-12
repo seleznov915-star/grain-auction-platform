@@ -5,6 +5,7 @@ import os
 import logging
 from pathlib import Path
 from typing import List
+from fastapi import FastAPI
 
 from backend.models import (
     Grain, GrainResponse, 
@@ -32,6 +33,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+mongo_url = os.environ["MONGO_URL"]
+db_name = os.environ.get("DB_NAME", "grain_app")
+
 # Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
 
@@ -41,6 +45,9 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
+@app.get("/")
+async def root():
+    return {"status": "ok", "db": "connected"}
 
 
 # Seed database on startup

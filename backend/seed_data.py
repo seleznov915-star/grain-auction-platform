@@ -1,4 +1,4 @@
-# Initial grain data for seeding
+
 INITIAL_GRAINS = [
     {
         'id': '1',
