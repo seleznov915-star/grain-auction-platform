@@ -1,20 +1,11 @@
 import logging
 from fastapi import APIRouter, HTTPException, Depends
-
-from backend.auth import (
-    get_password_hash,
-    verify_password,
-    create_access_token,
-    get_current_user,
-    get_current_admin
-)
-
+from backend.auth import pwd_context, create_access_token, get_current_user, get_current_admin
 from backend.database import users_collection
 from backend.email_service import (
     send_accreditation_approved_email,
     send_accreditation_rejected_email
 )
-
 from backend.auth_models import (
     UserRegister,
     UserLogin,
@@ -27,16 +18,25 @@ from backend.auth_models import (
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/auth", tags=["auth"])
 
+# ---------- PASSWORD UTILS ----------
+def get_password_hash(password: str) -> str:
+    """Hash password, trimming to 72 bytes for bcrypt"""
+    trimmed = password[:72]
+    return pwd_context.hash(trimmed)
 
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """Verify password, trimming to 72 bytes for bcrypt"""
+    trimmed = plain_password[:72]
+    return pwd_context.verify(trimmed, hashed_password)
+
+# ---------- ROUTES ----------
 @router.post("/register", response_model=UserResponse)
 async def register(user_data: UserRegister):
     """Register new user"""
-    # Check if user exists
     existing_user = await users_collection.find_one({"email": user_data.email})
     if existing_user:
         raise HTTPException(status_code=400, detail="Email already registered")
     
-    # Create user
     user = User(
         **user_data.dict(exclude={"password"}),
         hashed_password=get_password_hash(user_data.password)
@@ -44,9 +44,7 @@ async def register(user_data: UserRegister):
     
     await users_collection.insert_one(user.dict())
     logger.info(f"User registered: {user.email}")
-    
     return UserResponse(**user.dict())
-
 
 @router.post("/login", response_model=Token)
 async def login(login_data: UserLogin):
@@ -57,8 +55,6 @@ async def login(login_data: UserLogin):
         raise HTTPException(status_code=401, detail="Incorrect email or password")
     
     user = User(**user_doc)
-    
-    # Create token
     token_data = {
         "sub": user.id,
         "email": user.email,
@@ -66,7 +62,6 @@ async def login(login_data: UserLogin):
         "accreditation_status": user.accreditation_status
     }
     access_token = create_access_token(token_data)
-    
     logger.info(f"User logged in: {user.email}")
     
     return Token(
@@ -75,23 +70,19 @@ async def login(login_data: UserLogin):
         user=UserResponse(**user.dict())
     )
 
-
 @router.get("/me", response_model=UserResponse)
 async def get_current_user_info(current_user: dict = Depends(get_current_user)):
     """Get current user info"""
     user_doc = await users_collection.find_one({"id": current_user["sub"]})
     if not user_doc:
         raise HTTPException(status_code=404, detail="User not found")
-    
     return UserResponse(**user_doc)
-
 
 @router.get("/pending-accreditations", response_model=list[UserResponse])
 async def get_pending_accreditations(current_user: dict = Depends(get_current_admin)):
     """Get all pending accreditation requests (Admin only)"""
     users = await users_collection.find({"accreditation_status": "pending"}).to_list(100)
     return [UserResponse(**user) for user in users]
-
 
 @router.post("/update-accreditation")
 async def update_accreditation(
@@ -111,12 +102,10 @@ async def update_accreditation(
         {"$set": {"accreditation_status": data.status}}
     )
     
-    # Send email notification
     if data.status == "approved":
         send_accreditation_approved_email(user_doc["email"], user_doc["full_name"])
     else:
         send_accreditation_rejected_email(user_doc["email"], user_doc["full_name"])
     
     logger.info(f"Accreditation {data.status} for user: {user_doc['email']}")
-    
     return {"success": True, "message": f"Accreditation {data.status}"}

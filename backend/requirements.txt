@@ -1,6 +1,7 @@
 annotated-types==0.7.0
 anyio==4.11.0
 black==25.9.0
+bcrypt>=4.0.1
 boto3==1.40.41
 botocore==1.40.41
 certifi==2025.8.3
@@ -66,8 +67,6 @@ tzdata==2025.2
 urllib3==2.5.0
 uvicorn[standard]==0.25.0
 watchfiles==1.1.0
-python-dotenv
-pymongo[srv]
-uvicorn
-fastapi
-dnspython
+fastapi==0.110.1
+
+
