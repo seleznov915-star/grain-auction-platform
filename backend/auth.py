@@ -15,7 +15,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 security = HTTPBearer()  # ✅ додано
 
 def hash_password(password: str) -> str:
-    trimmed = password[:72]  # обмеження bcrypt
+    trimmed = password[:72]  # обрізаємо до 72 символів
     return pwd_context.hash(trimmed)
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
