@@ -40,11 +40,9 @@ async def admin_reset_password(
     payload: dict = Body(...),
     x_admin_reset_secret: str | None = Header(None)
 ):
-    """Reset admin password (TEMPORARY endpoint)"""
-
 env_secret = os.environ.get("ADMIN_RESET_SECRET")
-    if not env_secret or x_admin_reset_secret != env_secret:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
+if not env_secret or x_admin_reset_secret != env_secret:
+    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
 
 
     new_password = payload.get("new_password")
