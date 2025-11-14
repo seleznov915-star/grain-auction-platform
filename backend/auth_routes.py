@@ -51,10 +51,7 @@ async def admin_reset_password(
     if not new_password:
         raise HTTPException(status_code=400, detail="Missing new_password")
 
-    # bcrypt max 72 bytes fix
-    trimmed = new_password[:72]
-
-    hashed_password = get_password_hash(trimmed)
+    hashed_password = get_password_hash(new_password)
 
     result = await users_collection.update_one(
         {"email": "admin@graincompany.ua"},
@@ -66,16 +63,17 @@ async def admin_reset_password(
     else:
         return {"status": "error", "message": "Admin not found or unchanged"}
 
+
 # ==========================================================
 # LOGIN
 # ==========================================================
 @router.post("/login", response_model=Token)
 async def login(login_data: UserLogin):
     user_doc = await users_collection.find_one({"email": login_data.email})
-    
+
     if not user_doc or not verify_password(login_data.password, user_doc["hashed_password"]):
         raise HTTPException(status_code=401, detail="Incorrect email or password")
-    
+
     user = User(**user_doc)
     token_data = {
         "sub": user.id,
@@ -84,7 +82,7 @@ async def login(login_data: UserLogin):
         "accreditation_status": user.accreditation_status
     }
     access_token = create_access_token(token_data)
-    
+
     return Token(
         access_token=access_token,
         token_type="bearer",
@@ -119,19 +117,19 @@ async def update_accreditation(
 ):
     if data.status not in ["approved", "rejected"]:
         raise HTTPException(status_code=400, detail="Invalid status")
-    
+
     user_doc = await users_collection.find_one({"id": data.user_id})
     if not user_doc:
         raise HTTPException(status_code=404, detail="User not found")
-    
+
     await users_collection.update_one(
         {"id": data.user_id},
         {"$set": {"accreditation_status": data.status}}
     )
-    
+
     if data.status == "approved":
         send_accreditation_approved_email(user_doc["email"], user_doc["full_name"])
     else:
         send_accreditation_rejected_email(user_doc["email"], user_doc["full_name"])
-    
+
     return {"success": True, "message": f"Accreditation {data.status}"}
