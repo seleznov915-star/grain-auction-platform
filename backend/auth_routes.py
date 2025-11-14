@@ -51,12 +51,13 @@ async def admin_reset_password(
     if not new_password:
         raise HTTPException(status_code=400, detail="Missing new_password")
 
-    hashed = get_password_hash(new_password)
+    hashed_password = get_password_hash(new_password)
 
-    result = await users_collection.update_one(
-        {"email": "admin@graincompany.ua"},
-        {"$set": {"hashed_password": hashed}}
-    )
+result = await users_collection.update_one(
+    {"email": "admin@graincompany.ua"},
+    {"$set": {"hashed_password": hashed_password}}
+)
+
 
     if result.modified_count > 0:
         return {"status": "ok", "message": "Admin password updated"}
