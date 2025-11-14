@@ -1,5 +1,6 @@
 import logging
-from fastapi import APIRouter, HTTPException, Depends
+import os
+from fastapi import APIRouter, HTTPException, Depends, Header, status, Body
 from backend.auth import pwd_context, create_access_token, get_current_user, get_current_admin
 from backend.database import users_collection
 from backend.email_service import (
@@ -18,37 +19,56 @@ from backend.auth_models import (
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/auth", tags=["auth"])
 
-# ---------- PASSWORD UTILS ----------
+
+# ==========================================================
+# PASSWORD HELPERS
+# ==========================================================
 def get_password_hash(password: str) -> str:
-    """Hash password, trimming to 72 bytes for bcrypt"""
     trimmed = password[:72]
     return pwd_context.hash(trimmed)
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """Verify password, trimming to 72 bytes for bcrypt"""
     trimmed = plain_password[:72]
     return pwd_context.verify(trimmed, hashed_password)
 
-# ---------- ROUTES ----------
-@router.post("/register", response_model=UserResponse)
-async def register(user_data: UserRegister):
-    """Register new user"""
-    existing_user = await users_collection.find_one({"email": user_data.email})
-    if existing_user:
-        raise HTTPException(status_code=400, detail="Email already registered")
-    
-    user = User(
-        **user_data.dict(exclude={"password"}),
-        hashed_password=get_password_hash(user_data.password)
-    )
-    
-    await users_collection.insert_one(user.dict())
-    logger.info(f"User registered: {user.email}")
-    return UserResponse(**user.dict())
 
+# ==========================================================
+# TEMPORARY ADMIN RESET ENDPOINT
+# ==========================================================
+@router.post("/admin/reset-password")
+async def admin_reset_password(
+    payload: dict = Body(...),
+    x_admin_reset_secret: str | None = Header(None)
+):
+    """Reset admin password (TEMPORARY endpoint)"""
+
+    env_secret = os.environ.get("ADMIN_RESET_SECRET")
+
+    if not env_secret or x_admin_reset_secret != env_secret:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
+
+    new_password = payload.get("new_password")
+    if not new_password:
+        raise HTTPException(status_code=400, detail="Missing new_password")
+
+    hashed = get_password_hash(new_password)
+
+    result = await users_collection.update_one(
+        {"email": "admin@graincompany.ua"},
+        {"$set": {"hashed_password": hashed}}
+    )
+
+    if result.modified_count > 0:
+        return {"status": "ok", "message": "Admin password updated"}
+    else:
+        return {"status": "error", "message": "Admin not found or unchanged"}
+
+
+# ==========================================================
+# LOGIN
+# ==========================================================
 @router.post("/login", response_model=Token)
 async def login(login_data: UserLogin):
-    """Login user"""
     user_doc = await users_collection.find_one({"email": login_data.email})
     
     if not user_doc or not verify_password(login_data.password, user_doc["hashed_password"]):
@@ -62,7 +82,6 @@ async def login(login_data: UserLogin):
         "accreditation_status": user.accreditation_status
     }
     access_token = create_access_token(token_data)
-    logger.info(f"User logged in: {user.email}")
     
     return Token(
         access_token=access_token,
@@ -70,26 +89,32 @@ async def login(login_data: UserLogin):
         user=UserResponse(**user.dict())
     )
 
+
+# ==========================================================
+# CURRENT USER INFO
+# ==========================================================
 @router.get("/me", response_model=UserResponse)
 async def get_current_user_info(current_user: dict = Depends(get_current_user)):
-    """Get current user info"""
     user_doc = await users_collection.find_one({"id": current_user["sub"]})
     if not user_doc:
         raise HTTPException(status_code=404, detail="User not found")
     return UserResponse(**user_doc)
 
+
+# ==========================================================
+# ACCREDITATION LOGIC
+# ==========================================================
 @router.get("/pending-accreditations", response_model=list[UserResponse])
 async def get_pending_accreditations(current_user: dict = Depends(get_current_admin)):
-    """Get all pending accreditation requests (Admin only)"""
     users = await users_collection.find({"accreditation_status": "pending"}).to_list(100)
     return [UserResponse(**user) for user in users]
+
 
 @router.post("/update-accreditation")
 async def update_accreditation(
     data: AccreditationUpdate,
     current_user: dict = Depends(get_current_admin)
 ):
-    """Update user accreditation status (Admin only)"""
     if data.status not in ["approved", "rejected"]:
         raise HTTPException(status_code=400, detail="Invalid status")
     
@@ -107,5 +132,4 @@ async def update_accreditation(
     else:
         send_accreditation_rejected_email(user_doc["email"], user_doc["full_name"])
     
-    logger.info(f"Accreditation {data.status} for user: {user_doc['email']}")
     return {"success": True, "message": f"Accreditation {data.status}"}
