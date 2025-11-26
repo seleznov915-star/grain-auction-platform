@@ -33,13 +33,21 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const login = async (email, password) => {
-    const response = await axios.post(`${API}/auth/login`, { email, password });
-    setToken(response.data.access_token);
-    setUser(response.data.user);
-    localStorage.setItem('token', response.data.access_token);
-    return response.data.user;
-  };
+ const login = async (email, password) => {
+  const response = await axios.post(
+    `${API}/auth/login`,
+    { email, password },
+    {
+      headers: { "Content-Type": "application/json" },
+      withCredentials: true,
+    }
+  );
+
+  setToken(response.data.access_token);
+  setUser(response.data.user);
+  localStorage.setItem('token', response.data.access_token);
+  return response.data.user;
+};
 
   const register = async (userData) => {
     await axios.post(`${API}/auth/register`, userData);
