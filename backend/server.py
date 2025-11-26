@@ -1,6 +1,5 @@
 from fastapi import FastAPI, APIRouter, HTTPException
 from dotenv import load_dotenv
-from starlette.middleware.cors import CORSMiddleware
 import os
 import logging
 from pathlib import Path
@@ -17,6 +16,7 @@ from backend.seed_data import INITIAL_GRAINS
 from backend.auth_routes import router as auth_router
 from backend.auction_routes import router as auction_router
 from backend.auth import hash_password
+from fastapi.middleware.cors import CORSMiddleware
 
 
 ROOT_DIR = Path(__file__).parent
@@ -25,13 +25,7 @@ load_dotenv(ROOT_DIR / '.env')
 # Create the main app without a prefix
 app = FastAPI()
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_credentials=True,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+
 
 mongo_url = os.environ["MONGO_URL"]
 db_name = os.environ.get("DB_NAME", "grain_app")
@@ -128,6 +122,17 @@ async def create_contact(contact_data: ContactCreate):
         logger.error(f"Error creating contact: {e}")
         raise HTTPException(status_code=500, detail="Failed to submit contact form")
 
+origins = [
+    "https://grain-auction-platform-git-main-seleznov915s-projects.vercel.app",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Include the routers in the main app
 app.include_router(api_router)
