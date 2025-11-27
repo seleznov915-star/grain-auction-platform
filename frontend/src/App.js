@@ -13,6 +13,7 @@ import Contact from "./pages/Contact";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
+import Clock from "./components/Clock";
 
 
 
@@ -23,6 +24,7 @@ function App() {
         <BrowserRouter>
           <div className="App">
             <Header />
+            <Clock /> {/* Годинник зверху, під Header */}
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/catalog" element={<Catalog />} />
@@ -40,5 +42,6 @@ function App() {
     </LanguageProvider>
   );
 }
+
 
 export default App;
