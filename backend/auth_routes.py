@@ -35,6 +35,33 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 # ==========================================================
 # TEMPORARY ADMIN RESET ENDPOINT
 # ==========================================================
+@router.post("/register", response_model=UserResponse)
+async def register(user_data: UserRegister):
+    # Check if user already exists
+    existing_user = await users_collection.find_one({"email": user_data.email})
+    if existing_user:
+        raise HTTPException(status_code=400, detail="Email already registered")
+
+    hashed_password = get_password_hash(user_data.password)
+
+    user = User(
+        email=user_data.email,
+        hashed_password=hashed_password,
+        full_name=user_data.full_name,
+        company_name=user_data.company_name,
+        edrpou=user_data.edrpou,
+        phone=user_data.phone,
+        role="buyer",  # All new users default as buyers
+        accreditation_status="pending"  # Need admin approval
+    )
+
+    await users_collection.insert_one(user.dict())
+
+    logger.info(f"New user registered: {user.email}")
+
+    return UserResponse(**user.dict())
+
+
 @router.post("/admin/reset-password")
 async def admin_reset_password(
     payload: dict = Body(...),
