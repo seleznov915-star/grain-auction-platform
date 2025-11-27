@@ -12,10 +12,16 @@ from backend.auth import get_current_admin, get_approved_buyer, get_current_user
 from backend.database import auctions_collection, bids_collection, users_collection
 from backend.email_service import send_auction_winner_email
 from datetime import datetime
+from fastapi.responses import JSONResponse
 import logging
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/auctions", tags=["auctions"])
+
+
+@router.options("/select-winner")
+async def options_select_winner():
+    return JSONResponse(status_code=200)
 
 
 @router.post("/create", response_model=AuctionResponse)
