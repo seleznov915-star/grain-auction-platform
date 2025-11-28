@@ -141,6 +141,5 @@ async def create_contact(contact_data: ContactCreate):
 
 # Include the routers in the main app
 app.include_router(api_router)
-app.include_router(auth_router)
-app.include_router(auction_router)
-
+app.include_router(auth_router, prefix="/api")
+app.include_router(auction_router, prefix="/api")
