@@ -1,12 +1,12 @@
 // components/Clock.js
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 export default function Clock() {
   const [time, setTime] = useState(new Date());
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(timer); // очищаємо таймер при демонтованні
+    return () => clearInterval(timer);
   }, []);
 
   const formatTime = (date) => {
@@ -20,7 +20,8 @@ export default function Clock() {
       fontWeight: "bold",
       padding: "10px",
       backgroundColor: "#f0f0f0",
-      borderBottom: "1px solid #ccc"
+      borderBottom: "1px solid #ccc",
+      zIndex: 1000,
     }}>
       {formatTime(time)}
     </div>
