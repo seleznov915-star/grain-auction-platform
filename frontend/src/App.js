@@ -24,8 +24,9 @@ function App() {
         <BrowserRouter>
           <div className="App">
             <Header />
-            <Clock /> {/* Годинник зверху, під Header */}
-            <Routes>
+            <div>ТУТ ГОДИННИК</div>
+            <Clock />
+                        <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/catalog" element={<Catalog />} />
               <Route path="/about" element={<About />} />
