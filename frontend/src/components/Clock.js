@@ -1,3 +1,4 @@
+// components/Clock.js
 import { useEffect, useState } from "react";
 
 export default function Clock() {
@@ -5,20 +6,23 @@ export default function Clock() {
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(timer);
+    return () => clearInterval(timer); // очищаємо таймер при демонтованні
   }, []);
+
+  const formatTime = (date) => {
+    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  };
 
   return (
     <div style={{
-      background: "red",
-      color: "#fff",
-      fontSize: "20px",
       textAlign: "center",
-      padding: "12px",
-      zIndex: 9999,
-      position: "relative"
+      fontSize: "1.5rem",
+      fontWeight: "bold",
+      padding: "10px",
+      backgroundColor: "#f0f0f0",
+      borderBottom: "1px solid #ccc"
     }}>
-      TEST CLOCK — {time.toLocaleTimeString()}
+      {formatTime(time)}
     </div>
   );
 }
